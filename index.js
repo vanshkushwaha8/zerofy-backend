@@ -9,8 +9,16 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 
+const allowedOrigins = ['https://zerofy.netlify.app', 'http://localhost:3000'];
+
 app.use(cors({
-  origin: '*',
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS policy: Not allowed - ${origin}`));
+    }
+  },
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
 }));
