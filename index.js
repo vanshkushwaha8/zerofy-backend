@@ -8,20 +8,31 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-const allowedOrigins = ['https://zerofy-tawny.vercel.app', 'http://localhost:5173','*'];
+const allowedOrigins = [
+  'https://zerofy.netlify.app',
+  'https://zerofy-tawny.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  '*',
+];
 
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error(`CORS not allowed for origin ${origin}`));
+      console.log('❌ Blocked CORS for origin:', origin);
+      callback(new Error(`CORS not allowed for ${origin}`));
     }
   },
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
-  credentials: true,
+  credentials: true
 }));
+
+// Handle preflight requests
+app.options('*', cors());
+
 
 // ✅ Handle preflight requests manually (important for CORS)
 app.options('/submit', cors());
