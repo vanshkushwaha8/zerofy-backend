@@ -2,15 +2,28 @@ import express from 'express';
 import cors from 'cors';
 import { google } from 'googleapis';
 import dotenv from 'dotenv';
-import path from 'path';
 
-dotenv.config(); // Load environment variables
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middlewares
-app.use(cors());
+
+const allowedOrigins = ['https://zerofy.netlify.app', 'http://localhost:5000']; 
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Google Auth setup
@@ -31,7 +44,7 @@ app.post('/submit', async (req, res) => {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: 'Sheet1!A1', // Sheet name
+      range: 'Sheet1!A1',
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values: [[name, email, resume, new Date().toLocaleString()]],
@@ -40,11 +53,11 @@ app.post('/submit', async (req, res) => {
 
     res.status(200).json({ message: 'Form submitted successfully!' });
   } catch (error) {
-    console.error(' Error saving to Google Sheet:', error);
+    console.error('Error saving to Google Sheet:', error);
     res.status(500).json({ message: 'Failed to submit form.' });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(` Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
