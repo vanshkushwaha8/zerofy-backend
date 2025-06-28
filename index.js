@@ -12,10 +12,10 @@ const allowedOrigins = [
   'https://zerofy.netlify.app',
   'https://zerofy-tawny.vercel.app',
   'http://localhost:3000',
-  'http://localhost:5173',
-  '*',
+  'http://localhost:5173'
 ];
 
+// ✅ CORS Middleware
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -25,21 +25,15 @@ app.use(cors({
       callback(new Error(`CORS not allowed for ${origin}`));
     }
   },
-  methods: ['GET', 'POST', 'OPTIONS'],
+  methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
-  credentials: true
+  credentials: false  // Set to `true` only if you're using cookies
 }));
 
-// Handle preflight requests
-app.options('*', cors());
-
-
-// ✅ Handle preflight requests manually (important for CORS)
-app.options('/submit', cors());
-
+// ✅ Express body parser
 app.use(express.json());
 
-// Google Sheets Auth setup
+// ✅ Google Sheets Auth setup
 const auth = new google.auth.GoogleAuth({
   keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS || './credentials.json',
   scopes: ['https://www.googleapis.com/auth/spreadsheets'],
@@ -47,6 +41,7 @@ const auth = new google.auth.GoogleAuth({
 
 const spreadsheetId = process.env.SPREADSHEET_ID;
 
+// ✅ POST /submit Route
 app.post('/submit', async (req, res) => {
   const { name, email, resume } = req.body;
   console.log('📩 Received submission:', { name, email, resume });
