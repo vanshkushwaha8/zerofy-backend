@@ -8,35 +8,37 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ===== ✅ CORS Setup (Netlify + Local Dev Allowed) =====
+const allowedOrigins = ['https://zerofy.netlify.app', 'http://localhost:3000'];
 
-const allowedOrigins = ['https://zerofy.netlify.app', 'http://localhost:5000']; 
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS policy: Not allowed - ${origin}`));
+    }
+  },
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type'],
+}));
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-  })
-);
-
+// ===== ✅ Express JSON Parser =====
 app.use(express.json());
 
-// Google Auth setup
+// ===== ✅ Google Sheets Auth Setup =====
 const auth = new google.auth.GoogleAuth({
   keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS || './credentials.json',
   scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
-// Spreadsheet ID from .env
+// ===== ✅ Sheet ID from .env =====
 const spreadsheetId = process.env.SPREADSHEET_ID;
 
+// ===== ✅ Handle Form Submit =====
 app.post('/submit', async (req, res) => {
   const { name, email, resume } = req.body;
+  console.log(' Received submission:', { name, email, resume });
 
   try {
     const client = await auth.getClient();
@@ -51,13 +53,15 @@ app.post('/submit', async (req, res) => {
       },
     });
 
+    console.log(' Data saved to Google Sheet.');
     res.status(200).json({ message: 'Form submitted successfully!' });
   } catch (error) {
-    console.error('Error saving to Google Sheet:', error);
-    res.status(500).json({ message: 'Failed to submit form.' });
+    console.error(' Error saving to Google Sheet:', error);
+    res.status(500).json({ message: 'Failed to submit the form.' });
   }
 });
 
+// =====  Start Server =====
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(` Server is running on port this  ${PORT}`);
 });
