@@ -8,34 +8,42 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ===== ✅ CORS Setup (Netlify + Local Dev Allowed) =====
-const allowedOrigins = ['https://zerofy.netlify.app', 'http://localhost:3000'];
+
+const allowedOrigins = [
+  'https://zerofy.netlify.app',
+  'https://www.zerofy.netlify.app',
+  'http://localhost:3000'
+];
+
 
 app.use(cors({
   origin: function (origin, callback) {
+    console.log('🌍 Request Origin:', origin); 
+
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error(`CORS policy: Not allowed - ${origin}`));
+      callback(new Error(`CORS policy: Not allowed origin - ${origin}`));
     }
   },
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type'],
 }));
 
-// ===== ✅ Express JSON Parser =====
+
+
 app.use(express.json());
 
-// ===== ✅ Google Sheets Auth Setup =====
+
 const auth = new google.auth.GoogleAuth({
   keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS || './credentials.json',
   scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
-// ===== ✅ Sheet ID from .env =====
+
 const spreadsheetId = process.env.SPREADSHEET_ID;
 
-// ===== ✅ Handle Form Submit =====
+
 app.post('/submit', async (req, res) => {
   const { name, email, resume } = req.body;
   console.log(' Received submission:', { name, email, resume });
@@ -61,7 +69,7 @@ app.post('/submit', async (req, res) => {
   }
 });
 
-// =====  Start Server =====
+
 app.listen(PORT, () => {
   console.log(` Server is running on port this  ${PORT}`);
 });
