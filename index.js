@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 
-const allowedOrigins = ['https://zerofy.netlify.app', 'http://localhost:3000'];
+const allowedOrigins = ['https://zerofy-tawny.vercel.app/', 'http://localhost:3000'];
 
 app.use(cors({
   origin: function (origin, callback) {
